@@ -1,8 +1,23 @@
-const express = require('express')
-const app = express()
+const express = require("express");
+const cors = require("cors");
+const multer = require("multer");
 
-app.get('/', function (req, res) {
-  res.send('Hello World')
-})
 
-app.listen(4000)
+require("./src/db_config");
+const authRouter = require("./src/feature_modules/auth/index");
+const eventRouter = require("./src/feature_modules/events/index");
+
+require("./src/feature_modules/models/User");
+
+const app = express();
+app.use(cors());
+app.use(express.json());
+
+app.use("/auth", authRouter);
+app.use("/event", eventRouter);
+
+app.get("/", function (req, res) {
+	res.send("Hello how you been today");
+});
+
+app.listen(5000);
