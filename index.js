@@ -1,7 +1,6 @@
 const express = require("express");
 const cors = require("cors");
-const multer = require("multer");
-
+require("dotenv").config();
 
 require("./src/db_config");
 const authRouter = require("./src/feature_modules/auth/index");
