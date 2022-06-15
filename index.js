@@ -18,8 +18,8 @@ app.use("/event", eventRouter);
 app.use("/tickets", ticketingRouter);
 
 app.get("/", function (req, res) {
-	res.send("Hello how you been today");
+	res.send("Hello aliens!");
 });
 
-// app.listen(process.env.PORT || 5000);
-app.listen(5000);
+app.listen(process.env.PORT || 5000);
+// app.listen(5000);
