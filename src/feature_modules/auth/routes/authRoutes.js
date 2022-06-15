@@ -77,12 +77,14 @@ authRouter.get("/pushnotification", async (req, res) => {
 
 	// umjesto XYZ... bi trebao pisati jako dugi hash kod
 	const pushSubscription = {
-		"endpoint": "https://fcm.googleapis.com/fcm/send/eKIbmTtlJBQ:APA91bEaorR3VylMeT6qZqK4sRAKDKQyyK89hsStRYSYZMBiaEBdIYKGyZMKoGzUdw-K1Hn1434Lr35XD_99RhCJOyT7FAsgKmTWK65ZgsM8Vjn8beRop-8-iT2oyi_6bqimn4JXtE6-",
-		"expirationTime": null,
-		"keys": {
-			"p256dh": "BMIWdQ1cWrE9-PzfaoMOoBcOzuWZ2ILOLquw8tm13_In3HKC6Tlx-KkvqcAw85ZlTIsLhOd-c0kTOB4OWMILsTo",
-			"auth": "iuvk0f8j_GN9EH6F3CgqPw"
-		}
+		endpoint:
+			"https://fcm.googleapis.com/fcm/send/eKIbmTtlJBQ:APA91bEaorR3VylMeT6qZqK4sRAKDKQyyK89hsStRYSYZMBiaEBdIYKGyZMKoGzUdw-K1Hn1434Lr35XD_99RhCJOyT7FAsgKmTWK65ZgsM8Vjn8beRop-8-iT2oyi_6bqimn4JXtE6-",
+		expirationTime: null,
+		keys: {
+			p256dh:
+				"BMIWdQ1cWrE9-PzfaoMOoBcOzuWZ2ILOLquw8tm13_In3HKC6Tlx-KkvqcAw85ZlTIsLhOd-c0kTOB4OWMILsTo",
+			auth: "iuvk0f8j_GN9EH6F3CgqPw",
+		},
 	};
 
 	webpush
@@ -91,6 +93,15 @@ authRouter.get("/pushnotification", async (req, res) => {
 		.catch((err) => console.log(err));
 
 	res.end();
+});
+
+authRouter.post("/subcribe", verifyToken, async (req, res) => {
+	try {
+		const body = req.body;
+	} catch (err) {
+		console.log(err);
+		res.status(400).send(err.message);
+	}
 });
 
 module.exports = authRouter;

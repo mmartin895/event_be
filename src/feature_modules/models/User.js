@@ -25,13 +25,17 @@ const userSchema = new Schema({
 		type: String,
 		default: new String("client"),
 	},
+	pushSubscription: {
+		type: Object,
+		default: null,
+	},
 });
 
-userSchema.virtual('events', {
-    ref: 'Event',
-    localField: '_id',
-    foreignField: 'organizer'
-})
+userSchema.virtual("events", {
+	ref: "Event",
+	localField: "_id",
+	foreignField: "organizer",
+});
 
 const User = new mongoose.model("User", userSchema);
 

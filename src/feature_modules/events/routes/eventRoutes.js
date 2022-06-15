@@ -13,6 +13,7 @@ const multer = require("multer");
 const { Event } = require("../../models/Event");
 const { verifyToken } = require("../../auth/middleware/authMiddleware");
 const { TicketInstance } = require("../../models/TicketInstance");
+const { PurchasedTicket } = require("../../models/PurchasedTicket");
 
 const authRouter = Router();
 
@@ -365,6 +366,32 @@ authRouter.get("/:id", async (req, res) => {
 		res.send(returnEventObject);
 	} catch (err) {
 		console.log(err.message);
+		res.status(400).send(err.message);
+	}
+});
+
+authRouter.post("/notify/:id", verifyToken, async (req, res) => {
+	try {
+		const event = await getEvent(req.params.id);
+		const body = req.body;
+
+		console.log(body);
+
+		if (!(event.organizer == req.user._id || req.user.userRole == "admin")) {
+			console.log("not authorized!");
+			res.status(403).send({
+				message: "You are unauthorized to add tickets to this event!",
+			});
+		} else {
+			console.log("You are authorized");
+
+			const ticketHolders = await PurchasedTicket.find({ event: event._id });
+			console.log("Duljina je ", ticketHolders.length);
+
+			res.status(200).send("Attendes notified!");
+		}
+	} catch (err) {
+		console.log(err);
 		res.status(400).send(err.message);
 	}
 });
