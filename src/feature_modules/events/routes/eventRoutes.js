@@ -8,6 +8,7 @@ const {
 	getSearchedEvents,
 	addEventTickets,
 	editEventPic,
+	notifyAtendees,
 } = require("../services/eventServices");
 const multer = require("multer");
 const { Event } = require("../../models/Event");
@@ -316,8 +317,16 @@ authRouter.post("/search", async (req, res) => {
 	const events = await getSearchedEvents(req.body);
 
 	const searchedEventsWithPics = events.map((element) => {
-		const { name, description, startTime, endTime, location, eventType, _id } =
-			element;
+		const {
+			name,
+			description,
+			startTime,
+			endTime,
+			location,
+			eventType,
+			latlong,
+			_id,
+		} = element;
 		var returnElement = {
 			name,
 			description,
@@ -326,6 +335,7 @@ authRouter.post("/search", async (req, res) => {
 			location,
 			eventType,
 			_id,
+			latlong,
 		};
 
 		returnElement.thumbnail = transformImageToSrc(element.thumbnail);
@@ -373,9 +383,9 @@ authRouter.get("/:id", async (req, res) => {
 authRouter.post("/notify/:id", verifyToken, async (req, res) => {
 	try {
 		const event = await getEvent(req.params.id);
-		const body = req.body;
+		const { title, notification } = req.body;
 
-		console.log(body);
+		console.log(title, notification);
 
 		if (!(event.organizer == req.user._id || req.user.userRole == "admin")) {
 			console.log("not authorized!");
@@ -385,8 +395,23 @@ authRouter.post("/notify/:id", verifyToken, async (req, res) => {
 		} else {
 			console.log("You are authorized");
 
-			const ticketHolders = await PurchasedTicket.find({ event: event._id });
-			console.log("Duljina je ", ticketHolders.length);
+			const ticketHolders = await PurchasedTicket.find({
+				event: event._id,
+			}).populate("user");
+
+			const uniqueHolders = [];
+			const uniqueMap = {};
+
+			ticketHolders.forEach((holder) => {
+				if (!uniqueMap[holder.user._id]) {
+					uniqueMap[holder.user._id] = 1;
+					uniqueHolders.push(holder);
+				}
+			});
+			notifyAtendees(uniqueHolders, { title, notification });
+
+			console.log("Jedinstvenih je", uniqueHolders.length);
+			console.log("Sve skupa  je", ticketHolders.length);
 
 			res.status(200).send("Attendes notified!");
 		}

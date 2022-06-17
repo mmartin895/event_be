@@ -38,14 +38,19 @@ const eventSchema = new Schema({
 		required: true,
 		ref: "User",
 	},
+	latlong: {
+		type: Object,
+		lat: Number,
+		lng: Number,
+		required: true,
+	},
 });
 
-eventSchema.virtual('tickets', {
-    ref: 'TicketInstance',
-    localField: '_id',
-    foreignField: 'event'
-})
-
+eventSchema.virtual("tickets", {
+	ref: "TicketInstance",
+	localField: "_id",
+	foreignField: "event",
+});
 
 const Event = new mongoose.model("Event", eventSchema);
 

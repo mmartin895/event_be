@@ -1,5 +1,6 @@
 const { Event } = require("../../models/Event");
 const { TicketInstance } = require("../../models/TicketInstance");
+const webpush = require("web-push");
 
 const sharp = require("sharp");
 const createEvent = async (body) => {
@@ -35,6 +36,7 @@ const addEventTickets = async (eventId, tickets) => {
 
 const createEventWithPic = async (request) => {
 	const { body, file, user } = request;
+	body.latlong = JSON.parse(body.latlong);
 	// console.log("user je \n", user);
 	if (file) {
 		console.log("file posstoji");
@@ -121,6 +123,13 @@ const getEvent = async (event_id) => {
 const getSearchedEvents = async (searchObject) => {
 	var queryObject = searchObject;
 
+	var searchedName = null;
+
+	if (queryObject.name) {
+		searchedName = queryObject.name;
+		delete queryObject.name;
+	}
+
 	if (queryObject.startTime) {
 		var startTime2 = queryObject.startTime;
 		var endTime2 = queryObject.endTime;
@@ -130,41 +139,54 @@ const getSearchedEvents = async (searchObject) => {
 	}
 	var events = await Event.find(
 		queryObject,
-		"name description startTime endTime location eventType thumbnail _id organizer" //thumbnail
+		"name description startTime endTime location eventType thumbnail _id latlong organizer" //thumbnail
 	);
 
-	if (false && startTime2) {
+	if (searchedName) {
+		const searchLowered = searchedName.toLowerCase();
+
+		events = events.filter((event) => {
+			return event.name.toLowerCase().includes(searchLowered);
+		});
+	}
+
+	if (startTime2) {
 		events = events.filter((event) => {
 			if (
 				new Date(event.startTime).getTime() < new Date(startTime2).getTime() ||
 				new Date(event.endTime).getTime() > new Date(endTime2).getTime()
 			) {
-				// console.log("false odsjecak");
-				// console.log(
-				// 	new Date(event.startTime).getTime() < new Date(startTime2).getTime()
-				// );
-				// console.log(new Date(event.startTime), new Date(startTime2));
-				// console.log(new Date(event.startTime).toLocaleDateString());
-				// console.log(new Date(startTime2).toLocaleDateString());
-
-				// console.log(
-				// 	new Date(event.endTime).getTime() > new Date(endTime2).getTime()
-				// );
-
 				return false;
 			}
-			// console.log("true odsjecak");
-			// console.log(
-			// 	new Date(event.startTime).getTime() < new Date(startTime2).getTime()
-			// );
-			// console.log(
-			// 	new Date(event.endTime).getTime() > new Date(endTime2).getTime()
-			// );
+
 			return true;
 		});
 	}
 
 	return events;
+};
+
+const notifyAtendees = async (attendes, message) => {
+	const privateKey = "YecuWqWBw0ExqalJtuHGy5g31uDFUw3UEBMIe2_ywbI";
+	const publicKey =
+		"BP3mliomXHHuSTC3QOG4GEDxeFfAg__PBtHya2Hi5506OgQih8-Oc4DPgkaZDGP9aN73ak6Uydb1EtzAoJGYnYE";
+
+	webpush.setGCMAPIKey(
+		"AAAAru5IKoc:APA91bFqjgP_mKPiyOVVI655pEr_6fjvqYIOwIR9gzj8yuba5u-_9l4YjXsBsXQv0H3WEWmhlp5wEMH8cATsOKPR1vaUvFJsDdBaJz3c9Y0yvYI8TF3irU8iAh3VZYVme2Cus-KvxaNY"
+	);
+	webpush.setVapidDetails("mailto:example@gmail.com", publicKey, privateKey);
+
+	console.log(message);
+
+	attendes.forEach((attendee) => {
+		console.log(attendee.user.pushSubscription);
+		webpush
+			.sendNotification(attendee.user.pushSubscription, JSON.stringify(message))
+			.then((res) => console.log(res))
+			.catch((err) => console.log(err));
+	});
+
+	return;
 };
 
 module.exports = {
@@ -176,4 +198,5 @@ module.exports = {
 	getSearchedEvents,
 	addEventTickets,
 	editEventPic,
+	notifyAtendees,
 };
