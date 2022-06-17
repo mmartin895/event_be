@@ -42,7 +42,6 @@ const eventSchema = new Schema({
 		type: Object,
 		lat: Number,
 		lng: Number,
-		required: true,
 	},
 });
 
