@@ -408,7 +408,7 @@ authRouter.post("/notify/:id", verifyToken, async (req, res) => {
 					uniqueHolders.push(holder);
 				}
 			});
-			notifyAtendees(uniqueHolders, { title, notification });
+			notifyAtendees(uniqueHolders, { title, notification, id: event._id });
 
 			console.log("Jedinstvenih je", uniqueHolders.length);
 			console.log("Sve skupa  je", ticketHolders.length);
